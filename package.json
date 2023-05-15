@@ -10,6 +10,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@contentful/rich-text-react-renderer": "^15.16.4",
+    "@contentful/rich-text-types": "^16.1.0",
     "@remix-run/css-bundle": "^1.16.0",
     "@remix-run/express": "^1.16.0",
     "@remix-run/node": "^1.16.0",

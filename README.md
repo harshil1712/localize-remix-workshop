@@ -2,56 +2,30 @@
 
 Welcome to Localize Remix Workshop. In this repository, you will learn how to localize your Remix website.
 
-In this step (Step-4), you fetch data from Contentful and render it.
+In this step (Step-5), you will implement dynamic routing to render recipes.
 
-## 1. Create contentful.server.js file
+## 1. Fetch details of the recipe from Contentful
 
-Create the `app/utils/contentful.server.js` file. This file will contain all the code that handles content fetching from Contentful.
+In the `app/utils/contentful.server.js` file, add a function that fetches the details of a recipe. This function should take the `id` and `locale` as the params.
 
-The project uses the [Contentful GraphQL API](https://www.contentful.com/developers/docs/references/graphql/) to fetch the content.
+## 2. Create $id.jsx file
 
-> NOTE: You can use the [Content Delivery API](https://www.contentful.com/developers/docs/concepts/apis/#content-delivery-api) or the [SDK](https://github.com/contentful/contentful.js), instead of the GraphQL API.
+Create the [`app/routes/$id.jsx`](./app/routes/%24id.jsx) file. This file will serve as a template for all our recipes.
 
-1. Create a function that handels the API calls. This function will take `query` and `variables` as parameters.
-2. Create a function that fetches all the recipes from Contentful. This function will take `locale` as the parameter.
+Similar to `_index.jsx` file, fetch the content from Contentful for a single recipe. Render the fetched content.
 
-## 2. Update _index.jsx file
+## 3. Rendering Rich Text
 
-Update the `_index.jsx` file to fetch and render the data from Contentful.
+The `ingredients` and the `instructions` fields are of the type [Rich Text](https://www.contentful.com/developers/docs/concepts/rich-text/). To render them, install the following packages.
 
-```js
-...
-import { getRecipes } from '../utils/contentful.server'
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import remixI18n from '../i18n.server'
-
-export async function loader({ request }) {
-  const locale = await remixI18n.getLocale(request)
-  const recipes = await getRecipes(locale)
-  return json({ recipes, locale })
-}
-
-export default function Index() {
-  ...
-  const { recipes } = useLoaderData()
-  ...
-}
+```sh
+npm i @contentful/rich-text-react-renderer @contentful/rich-text-types
 ```
 
-## 3. Add Contentful credentials
-
-Create a `.env` file and paste the following:
-
-```
-CONTENTFUL_SPACE_ID=YOUR_SPACE_ID
-CONTENTFUL_ACCESS_TOKEN=YOUR_ACCESS_TOKEN
-```
-
-Replace `YOUR_SPACE_ID` and `YOUR_ACCESS_TOKEN` with your Space ID and Access Token.
-
-> NOTE: Since the data is fetched with the GraphQL API, make sure to use the Preview token.
+Use the above packages to render Rich Text.
 
 ## Learn more
 
+- [Rendering linked assets and entries in the Contentful Rich Text field](https://www.contentful.com/blog/rendering-linked-assets-entries-in-contentful/)
+- [Routing in Remix](https://remix.run/docs/en/main/guides/routing)
 - [Workshop Guide](https://github.com/harshil1712/localize-remix-workshop)

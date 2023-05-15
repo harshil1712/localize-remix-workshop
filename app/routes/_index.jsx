@@ -25,7 +25,7 @@ export default function Index() {
               key={recipe.id}
               title={recipe.title}
               description={recipe.description}
-              slug={recipe.id}
+              slug={recipe.sys.id}
               image={recipe.coverImage}
             />
           ))
