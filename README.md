@@ -2,76 +2,55 @@
 
 Welcome to Localize Remix Workshop. In this repository, you will learn how to localize your Remix website.
 
-In this step (Step-3), you implement language switcher and also store the information in cookie.
+In this step (Step-4), you fetch data from Contentful and render it.
 
-## 1. Update Nav.jsx
+## 1. Create contentful.server.js file
 
-By default, remix-i18next detects the current language in this order:
+Create the `app/utils/contentful.server.js` file. This file will contain all the code that handles content fetching from Contentful.
 
-1. The `lng` search parameter
-2. A cookie (if available)
-3. The session (if sessionStorage is passed)
-4. The Accept-Language header
-5. The fallback language you configured
+The project uses the [Contentful GraphQL API](https://www.contentful.com/developers/docs/references/graphql/) to fetch the content.
 
-However, user might want to manually change the locale. For the same, you pass the `lng` parameter.
+> NOTE: You can use the [Content Delivery API](https://www.contentful.com/developers/docs/concepts/apis/#content-delivery-api) or the [SDK](https://github.com/contentful/contentful.js), instead of the GraphQL API.
 
-Update the code in your [Nav.jsx](./app/Components/Nav.jsx) file. Add the Link component that passes the `lng` parameter.
+1. Create a function that handels the API calls. This function will take `query` and `variables` as parameters.
+2. Create a function that fetches all the recipes from Contentful. This function will take `locale` as the parameter.
 
-```html
-<Link
-    to={`/?lng=${lng.value}`}
-    key={lng.value}
-    className={(i18n.resolvedLanguage === lng.value ? "underline " : "") + "px-1"}
->
-    {lng.name}
-</Link>
-```
+## 2. Update _index.jsx file
 
-## 2. Add cookie.js file
-
-Remix provides methods to handle cookies. Create a `cookie.js` file and add the following code:
+Update the `_index.jsx` file to fetch and render the data from Contentful.
 
 ```js
-import { createCookie } from "@remix-run/node";
-
-export const i18nCookie = createCookie('i18n', {
-    sameSite: 'lax',
-    path: '/'
-})
-```
-
-## 3. Update i18n.server.js and root.jsx
-
-Update the [i18n.server.js](./app/i18n.server.js) and [root.jsx](./app/root.jsx) files to use the cookie.
-
-`i18n.server.js`
-```js
-import { i18nCookie } from './cookie'
 ...
-    detection: {
-        cookie: i18nCookie,
-    ...
-    }
-...
-```
+import { getRecipes } from '../utils/contentful.server'
+import { json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import remixI18n from '../i18n.server'
 
-
-`root.jsx`
-```js
-import { i18nCookie } from "./cookie";
-...
-
-export const loader = async ({ request }) => {
-  ...
-  return json({ locale, title }, {
-    headers: {
-      "Set-Cookie": await i18nCookie.serialize(locale)
-    }
-  })
+export async function loader({ request }) {
+  const locale = await remixI18n.getLocale(request)
+  const recipes = await getRecipes(locale)
+  return json({ recipes, locale })
 }
-...
+
+export default function Index() {
+  ...
+  const { recipes } = useLoaderData()
+  ...
+}
 ```
+
+## 3. Add Contentful credentials
+
+Create a `.env` file and paste the following:
+
+```
+CONTENTFUL_SPACE_ID=YOUR_SPACE_ID
+CONTENTFUL_ACCESS_TOKEN=YOUR_ACCESS_TOKEN
+```
+
+Replace `YOUR_SPACE_ID` and `YOUR_ACCESS_TOKEN` with your Space ID and Access Token.
+
+> NOTE: Since the data is fetched with the GraphQL API, make sure to use the Preview token.
 
 ## Learn more
 
