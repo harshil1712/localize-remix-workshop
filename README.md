@@ -2,69 +2,70 @@
 
 Welcome to Localize Remix Workshop. In this repository, you will learn how to localize your Remix website.
 
-In this step (Step-1), you will:
-## 1. Setup a Remix project
+In this step (Step-1
+2), you will implement internationalization to the website.
 
-To create a new Remix project from scratch, run the following command:
+## 1. Adding Packages
+
+Run the following command to install the required packages
 
 ```sh
-npx create-remix@latest
+npm i remix-i18next i18next react-i18next i18next-browser-languagedetector i18next-http-backend i18next-fs-backend
 ```
 
-## 2. Create the following components:
-    1. Nav
-    2. Card
+## 2. Create i18nextOptions.js file
 
-Create the Nav and Card component in the `./app/Components/Nav.jsx` and `./app/Components/Card.jsx` files respectively.
+This file contains the i18n configuration options like supported languages, default languages, etc.
 
-The Card component will have the following props:
-- Title - This will contain the title of the recipe
-- Description - This will contain a short description of the recipe
-- Slug - For this example, we will be using ID as slug
-- Image - This is an object that contains the URL and a description of the image.
-
-> NOTE: I am using TailwindCSS for styling. This is optional. You can use whatever you want for styling.
-
-## 3. Render the components on the page
-
-The Nav component should be rendered on all the pages. Hence, add the component to the `root.jsx` file.
-
-Copy the following mock data in your `_index.jsx` file.
+The structure looks as follow:
 
 ```js
-const recipes = [
-  {
-    id: "1",
-    title: "Hakka Noodles",
-    description: "Hakka Noodles fused in Indian style",
-    coverImage: {
-      url: "https://images.ctfassets.net/rsj8wf5a3fox/3vsTfOlKTonXK5e7MX83Vy/7d5671c521f6441c63ecdd3c382c2b17/IMG_2974.jpg",
-      description: "Hakka Noodles Image"
-    }
-  },
-  {
-    id: "2",
-    title: "Black Bean and Veggie Burritos",
-    description: "Delicious and healthy veggie burritos!",
-    coverImage: {
-      url: "https://images.ctfassets.net/rsj8wf5a3fox/4oaf0vi232rxojfzHcGrDG/4fabf817205583cf827fccdc93703ca5/IMG_7911.jpg",
-      description: "Black Beans and Veggie Burrito image"
-    }
-  },
-  {
-    id: "3",
-    title: "White Sauce Pasta",
-    description: "Delicious Cheesy Pasta",
-    coverImage: {
-      url: "https://images.ctfassets.net/rsj8wf5a3fox/34dZERDAm5GNzMqGvzcA2i/2e3cd6544f60be12675af72372565ff6/IMG_1586.jpg",
-      description: "White Gravy Pasta image"
-    }
-  },
-]
+export default {
+    debug: process.env.NODE_ENV !== 'production',
+    fallbackLng: 'FALLBACK_LANGUAGE', //eg. en-US
+    supportedLngs: ['', ''], // eg. ['en-US', 'de-DE']
+    defaultNS: '', // default value is translation. This project uses 'common'
+    react: { useSuspense: false } // In Remix you will not be using Suspense
+}
 ```
 
-Render the above data on the homepage using the Card component.
+## 3. Create locale files
+
+For all the supported languages mentioned above, create a `common.json` file in `/public/locales/SUPPORTED_LANGUAGE`. Eg. for `en-US`, create `public/locales/en-US/common.json`.
+
+These files will contain the translation for the header as well as the title of the index page. The structure looks as folllow:
+
+```json
+{
+    "headTitle": "",
+    "title": ""
+}
+```
+
+## 4. Create i18n.server.js
+
+Check the [i18n.server.js](./app/i18n.server.js) file.
+
+## 5. Update entry.client.jsx and entry.server.jsx
+
+Use the code from [entry.client.jsx](./app/entry.client.jsx) file.
+
+Use the code from [entry.server.jsx](./app/entry.server.jsx) file.
+
+## 6. Update the root.jsx file
+
+Update the [root.jsx](./app/root.jsx) file to implement i18n.
+
+## 7. Update the _index.jsx file
+
+Based on the user's language preference, and the i18n configuration, render the correct content on the page.
+
+## Render content in different language
+
+To check if the content renders for other supported languages, append the URL with `/?lng=LANGUAGE` parameter, where `LANGUAGE` is the one of the supported language.
+
+In the next step, you will add language switcher to make navigation between languages easy.
 
 ## Learn more
 
-- [Workshop Guide](https://remix.run/docs)
+- [Workshop Guide](https://github.com/harshil1712/localize-remix-workshop)

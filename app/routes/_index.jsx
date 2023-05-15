@@ -1,4 +1,5 @@
 import Card from "../Components/Card";
+import { useTranslation } from "react-i18next";
 
 const recipes = [
   {
@@ -30,14 +31,12 @@ const recipes = [
   },
 ]
 
-export const meta = () => {
-  return [{ title: "Remixed Recipes" }];
-};
-
 export default function Index() {
+  const { t, ready, i18n } = useTranslation();
+  if (!ready) return <p>Loading...</p>
   return (
     <div className="flex-grow container mx-auto">
-      <h1 className="text-center text-5xl my-8">Welcome to Remixed Recipes</h1>
+      <h1 className="text-center text-5xl my-8">{t('title')}</h1>
       <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:gap-x-8">
         {
           recipes.map((recipe) => (

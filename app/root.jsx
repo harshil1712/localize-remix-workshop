@@ -7,16 +7,39 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
+import { useChangeLanguage } from "remix-i18next";
+import remixI18n from './i18n.server'
+import { useTranslation } from "react-i18next";
+
 import Nav from "./Components/Nav";
+import { json } from "@remix-run/node";
 
 export const links = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
+export const loader = async ({ request }) => {
+  const locale = await remixI18n.getLocale(request)
+  const t = await remixI18n.getFixedT(request, 'common')
+  const title = t('headTitle')
+  return json({ locale, title })
+}
+
+export function meta({ data }) {
+  return [
+    { title: data.title }
+  ]
+}
+
 export default function App() {
+  const { i18n } = useTranslation()
+  const { locale } = useLoaderData()
+
+  useChangeLanguage(locale)
   return (
-    <html lang="en">
+    <html lang={i18n.resolvedLanguage}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />

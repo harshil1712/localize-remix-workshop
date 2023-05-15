@@ -1,121 +1,51 @@
-/**
- * By default, Remix will handle generating the HTTP Response for you.
- * You are free to delete this file if you'd like to, but if you ever want it revealed again, you can run `npx remix reveal` ✨
- * For more information, see https://remix.run/file-conventions/entry.server
- */
+import { renderToString } from 'react-dom/server'
+import { RemixServer } from '@remix-run/react'
+import { createInstance } from 'i18next'
+import { I18nextProvider, initReactI18next } from 'react-i18next'
+import Backend from 'i18next-fs-backend'
+import { resolve } from 'node:path'
+import i18nextOptions from './i18nextOptions'
+import i18n from './i18n.server'
 
-import { PassThrough } from "node:stream";
-
-import { Response } from "@remix-run/node";
-import { RemixServer } from "@remix-run/react";
-import isbot from "isbot";
-import { renderToPipeableStream } from "react-dom/server";
-
-const ABORT_DELAY = 5_000;
-
-export default function handleRequest(
+export default async function handleRequest(
   request,
-  responseStatusCode,
-  responseHeaders,
-  remixContext
+  statusCode,
+  headers,
+  context
 ) {
-  return isbot(request.headers.get("user-agent"))
-    ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      )
-    : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      );
-}
+  // Create a new instance of i18next so every request will have a unique instance and not share any state
+  const instance = createInstance()
 
-function handleBotRequest(
-  request,
-  responseStatusCode,
-  responseHeaders,
-  remixContext
-) {
-  return new Promise((resolve, reject) => {
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
+  // Detect locale from the request
+  const lng = await i18n.getLocale(request)
+  // Detect the namespaces the route is about to render
+  const ns = i18n.getRouteNamespaces(context)
 
-      {
-        onAllReady() {
-          const body = new PassThrough();
-
-          responseHeaders.set("Content-Type", "text/html");
-
-          resolve(
-            new Response(body, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(error) {
-          reject(error);
-        },
-        onError(error) {
-          responseStatusCode = 500;
-          console.error(error);
-        },
+  // Configure the instance
+  await instance
+    .use(initReactI18next)
+    .use(Backend)
+    .init({
+      ...i18nextOptions,
+      lng,
+      ns,
+      backend: {
+        loadPath: resolve("./public/locales/{{lng}}/{{ns}}.json"),
       }
-    );
+    })
 
-    setTimeout(abort, ABORT_DELAY);
-  });
-}
+  // Render your app wrapped in the I18nextProvider as in the
 
-function handleBrowserRequest(
-  request,
-  responseStatusCode,
-  responseHeaders,
-  remixContext
-) {
-  return new Promise((resolve, reject) => {
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
+  const markup = renderToString(
+    <I18nextProvider i18n={instance}>
+      <RemixServer context={context} url={request.url} />
+    </I18nextProvider>
+  );
 
-      {
-        onShellReady() {
-          const body = new PassThrough();
+  headers.set("Content-Type", "text/html");
 
-          responseHeaders.set("Content-Type", "text/html");
-
-          resolve(
-            new Response(body, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(error) {
-          reject(error);
-        },
-        onError(error) {
-          console.error(error);
-          responseStatusCode = 500;
-        },
-      }
-    );
-
-    setTimeout(abort, ABORT_DELAY);
-  });
+  return new Response("<!DOCTYPE html>" + markup, {
+    status: statusCode,
+    headers: headers,
+  })
 }
