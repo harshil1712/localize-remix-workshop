@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 
 import Nav from "./Components/Nav";
 import { json } from "@remix-run/node";
+import { i18nCookie } from "./cookie";
 
 export const links = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -24,7 +25,11 @@ export const loader = async ({ request }) => {
   const locale = await remixI18n.getLocale(request)
   const t = await remixI18n.getFixedT(request, 'common')
   const title = t('headTitle')
-  return json({ locale, title })
+  return json({ locale, title }, {
+    headers: {
+      "Set-Cookie": await i18nCookie.serialize(locale)
+    }
+  })
 }
 
 export function meta({ data }) {
