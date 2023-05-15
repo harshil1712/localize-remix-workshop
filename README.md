@@ -67,4 +67,4 @@ Render the above data on the homepage using the Card component.
 
 ## Learn more
 
-- [Workshop Guide](https://remix.run/docs)
+- [Workshop Guide](https://github.com/harshil1712/localize-remix-workshop)
