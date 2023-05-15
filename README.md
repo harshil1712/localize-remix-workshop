@@ -2,8 +2,7 @@
 
 Welcome to Localize Remix Workshop. In this repository, you will learn how to localize your Remix website.
 
-In this step (Step-1
-2), you will implement internationalization to the website.
+In this step (Step-2), you will implement internationalization to the website.
 
 ## 1. Adding Packages
 
