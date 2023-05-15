@@ -36,6 +36,14 @@ export default function Index() {
   ...
   const { recipes } = useLoaderData()
   ...
+  <Card
+    key={recipe.id}
+    title={recipe.title}
+    description={recipe.description}
+    slug={recipe.sys.id}
+    image={recipe.coverImage}
+    />
+  ...
 }
 ```
 
