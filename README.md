@@ -2,69 +2,76 @@
 
 Welcome to Localize Remix Workshop. In this repository, you will learn how to localize your Remix website.
 
-In this step (Step-1
-2), you will implement internationalization to the website.
+In this step (Step-3), you implement language switcher and also store the information in cookie.
 
-## 1. Adding Packages
+## 1. Update Nav.jsx
 
-Run the following command to install the required packages
+By default, remix-i18next detects the current language in this order:
 
-```sh
-npm i remix-i18next i18next react-i18next i18next-browser-languagedetector i18next-http-backend i18next-fs-backend
+1. The `lng` search parameter
+2. A cookie (if available)
+3. The session (if sessionStorage is passed)
+4. The Accept-Language header
+5. The fallback language you configured
+
+However, user might want to manually change the locale. For the same, you pass the `lng` parameter.
+
+Update the code in your [Nav.jsx](./app/Components/Nav.jsx) file. Add the Link component that passes the `lng` parameter.
+
+```html
+<Link
+    to={`/?lng=${lng.value}`}
+    key={lng.value}
+    className={(i18n.resolvedLanguage === lng.value ? "underline " : "") + "px-1"}
+>
+    {lng.name}
+</Link>
 ```
 
-## 2. Create i18nextOptions.js file
+## 2. Add cookie.js file
 
-This file contains the i18n configuration options like supported languages, default languages, etc.
-
-The structure looks as follow:
+Remix provides methods to handle cookies. Create a `cookie.js` file and add the following code:
 
 ```js
-export default {
-    debug: process.env.NODE_ENV !== 'production',
-    fallbackLng: 'FALLBACK_LANGUAGE', //eg. en-US
-    supportedLngs: ['', ''], // eg. ['en-US', 'de-DE']
-    defaultNS: '', // default value is translation. This project uses 'common'
-    react: { useSuspense: false } // In Remix you will not be using Suspense
-}
+import { createCookie } from "@remix-run/node";
+
+export const i18nCookie = createCookie('i18n', {
+    sameSite: 'lax',
+    path: '/'
+})
 ```
 
-## 3. Create locale files
+## 3. Update i18n.server.js and root.jsx
 
-For all the supported languages mentioned above, create a `common.json` file in `/public/locales/SUPPORTED_LANGUAGE`. Eg. for `en-US`, create `public/locales/en-US/common.json`.
+Update the [i18n.server.js](./app/i18n.server.js) and [root.jsx](./app/root.jsx) files to use the cookie.
 
-These files will contain the translation for the header as well as the title of the index page. The structure looks as folllow:
-
-```json
-{
-    "headTitle": "",
-    "title": ""
-}
+`i18n.server.js`
+```js
+import { i18nCookie } from './cookie'
+...
+    detection: {
+        cookie: i18nCookie,
+    ...
+    }
+...
 ```
 
-## 4. Create i18n.server.js
 
-Check the [i18n.server.js](./app/i18n.server.js) file.
+`root.jsx`
+```js
+import { i18nCookie } from "./cookie";
+...
 
-## 5. Update entry.client.jsx and entry.server.jsx
-
-Use the code from [entry.client.jsx](./app/entry.client.jsx) file.
-
-Use the code from [entry.server.jsx](./app/entry.server.jsx) file.
-
-## 6. Update the root.jsx file
-
-Update the [root.jsx](./app/root.jsx) file to implement i18n.
-
-## 7. Update the _index.jsx file
-
-Based on the user's language preference, and the i18n configuration, render the correct content on the page.
-
-## Render content in different language
-
-To check if the content renders for other supported languages, append the URL with `/?lng=LANGUAGE` parameter, where `LANGUAGE` is the one of the supported language.
-
-In the next step, you will add language switcher to make navigation between languages easy.
+export const loader = async ({ request }) => {
+  ...
+  return json({ locale, title }, {
+    headers: {
+      "Set-Cookie": await i18nCookie.serialize(locale)
+    }
+  })
+}
+...
+```
 
 ## Learn more
 
