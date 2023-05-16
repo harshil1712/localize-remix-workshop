@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react"
+import { Link, useLocation } from "@remix-run/react"
 import { useTranslation } from "react-i18next"
 
 const languages = [
@@ -14,6 +14,7 @@ const languages = [
 
 export default function Nav() {
     const { t, ready, i18n } = useTranslation();
+    const { pathname } = useLocation();
     return (
         <nav className="flex justify-between px-4 bg-slate-300 py-8">
             <div>
@@ -24,7 +25,7 @@ export default function Nav() {
                     languages.map((lng) => {
                         return (
                             <Link
-                                to={`/?lng=${lng.value}`}
+                                to={`${pathname}?lng=${lng.value}`}
                                 key={lng.value}
                                 className={(i18n.resolvedLanguage === lng.value ? "underline " : "") + "px-1"}
                             >
